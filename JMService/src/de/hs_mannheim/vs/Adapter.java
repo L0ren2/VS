@@ -7,23 +7,21 @@ import javax.naming.*;
 
 class Adapter {
 	static final int PORT = 8888;
-	static ArrayList<Socket> clients;
-	volatile static ArrayList<Message> messages;
+	volatile static ArrayList<Socket> clients;
 	static Produzent queueProduzent;
 	static Konsument queueKonsument;
 	static String prodDest = "send";
 	static String consDest = "recieve";
-	static ServerSocket servsock;
-	static Socket sock;
+	volatile static ServerSocket servsock;
+	volatile static Socket sock;
 	static Thread housekeeper;
 	static Thread queuewatcher;
 	static Thread clientwatcher;
 	
 	static void housekeeping() {
 		try {
+			servsock = new ServerSocket(PORT);
 			while(true) {
-				servsock = new ServerSocket(PORT);
-				clients = new ArrayList<Socket>();
 				sock = servsock.accept();
 				Socket s = sock;
 				clients.add(s);
@@ -46,18 +44,19 @@ class Adapter {
 	
 	static void watchQueue() {
 		try {
+			Message msg = null;
+			String text = "BIN";
 			while(true) {
-				Message msg = null;
 				msg = queueKonsument.recieve(0);
-				String text = "BIN";
 				//if message is a TextMessage and message isn't "" and message
-				if(msg != null && msg instanceof TextMessage && ((TextMessage) msg).getText() != "") {
+				if(msg != null && msg instanceof TextMessage && (!((TextMessage) msg).getText().equals(""))) {
 					text = ((TextMessage) msg).getText();
 				}
 				for(Socket client : clients) {
 					OutputStream cos = client.getOutputStream();
-					PrintWriter pwr = new PrintWriter(cos);
+					PrintWriter pwr = new PrintWriter(cos, true);
 					pwr.print(text + "\r\n\r\n");
+					pwr.flush();
 				}
 			}
 		} catch (Exception e) {
@@ -66,49 +65,23 @@ class Adapter {
 		}
 	}
 
-	private static class MessageHandler implements Runnable {
-		InputStream clientInputStream;
-		MessageHandler(InputStream is) {
-			clientInputStream = is;
-		}
-		
-		@Override
-		public void run() {
-			BufferedReader messageReader = new BufferedReader(new InputStreamReader(clientInputStream));
-			String message;
-			try {
-				do {
-					message = messageReader.readLine();	
-					queueProduzent.send(message);
-				} while(message != null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	
 	static void watchClients() {
-		try {
-			while (true) {
-				while(clients == null) {/*wait for housekeeper to initialize*/}
-				for(int i = 0; i < clients.size(); i++) {
-					Socket client = clients.get(i);
-					if(client == null) {
-						clients.remove(i);
-						continue;
+		while(true) {
+			//iterate through clients
+			clients.forEach(client -> {
+				//check for new msgs
+				try {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+					String message = reader.readLine();
+					while(message != null) {
+						//send msgs to queue
+						queueProduzent.send(message);
+						message = reader.readLine();
 					}
-					InputStream clientInputStream = client.getInputStream();
-					int messageSize = clientInputStream.available();
-					if(messageSize > 0) {
-						MessageHandler msgh = new MessageHandler(clientInputStream);
-						Thread messageHandlerThread = new Thread(msgh);
-						messageHandlerThread.start();
-					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			});
 		}
 	}
 	
@@ -117,6 +90,7 @@ class Adapter {
 			prodDest = args[0].toString();
 			consDest = args[1].toString();
 		}
+		clients = new ArrayList<Socket>();
     	queueProduzent = new Produzent(prodDest);
     	queueKonsument = new Konsument(consDest);
     	housekeeper = new Thread(() -> housekeeping());
