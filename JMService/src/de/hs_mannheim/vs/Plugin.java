@@ -28,6 +28,7 @@ public class Plugin implements PluginInterface {
 	@Override
 	public String transformText(String text) {
 		String match = matchForName(text);
+
 		if (!match.equals("")) {
 			transformed = true;
 			text = text.replace(match, "[*** Name ***]");
@@ -38,7 +39,7 @@ public class Plugin implements PluginInterface {
 		}
 		return text;
 	}
-	
+
 	/**
 	 * Searches a given String for names and returns the first match
 	 * @param text
@@ -54,14 +55,5 @@ public class Plugin implements PluginInterface {
 			}
 		}
 		return "";
-	}
-	
-	public static void main(String[] args) {
-		Plugin plugin = new Plugin();
-		String text = "Alexander König & Yusuf Özdemirkan, wanderten den Fluss entlang, und trafen Lorenz test." ;
-		String text1 = "Soll nicht verändert werden";
-		System.out.println("Text1: " +  plugin.transformText(text1));
-		System.out.println("Text2: " +  plugin.transformText(text));
-
 	}
 }
