@@ -6,9 +6,11 @@ import java.io.*;
 public class Plugin implements PluginInterface {
 	ArrayList<String> names = new ArrayList<String>();
 	File nameFile = new File(System.getProperty("user.dir") + "/src/names.txt");
+	boolean transformed;
 
 	Plugin() {
 		Scanner sc = null;
+		transformed = false;
 		try {
 			sc = new Scanner(nameFile);
 			while (sc.hasNextLine()) {
@@ -26,7 +28,6 @@ public class Plugin implements PluginInterface {
 	@Override
 	public String transformText(String text) {
 		String match = matchForName(text);
-		boolean transformed = false;
 		if (!match.equals("")) {
 			transformed = true;
 			text = text.replace(match, "[*** Name ***]");
@@ -53,5 +54,14 @@ public class Plugin implements PluginInterface {
 			}
 		}
 		return "";
+	}
+	
+	public static void main(String[] args) {
+		Plugin plugin = new Plugin();
+		String text = "Alexander König & Yusuf Özdemirkan, wanderten den Fluss entlang, und trafen Lorenz test." ;
+		String text1 = "Soll nicht verändert werden";
+		System.out.println("Text1: " +  plugin.transformText(text1));
+		System.out.println("Text2: " +  plugin.transformText(text));
+
 	}
 }
