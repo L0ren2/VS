@@ -1,0 +1,38 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>MQTT Broker</title>
+		<link href="styles.css" rel="stylesheet" />
+		<script type="text/javascript" src="script.js"></script>
+	</head>
+	<body>
+		<h1>Welcome to MQTT Broker service</h1>
+		<fieldset>
+			<legend>Please connect to a great Topic:</legend>
+			<form method="GET" action="http://localhost:8080/OurServlet/ServletPP">
+				<table>
+					<tr><td>
+						<label for="topic">Topic: </label>
+					</td><td>
+						<input id="topic" type="text" name="topic" /><br/>
+					</td></tr>
+					<tr><td>
+						<label for="ip">IP: </label>
+					</td><td>
+						<input id="ip" type="text" name="ip" /><br/>
+					</td></tr>
+					<tr><td>
+						<label for="port">Port: </label>
+					</td><td>
+						<input id="port" type="text" name="port" /><br/>
+					</td></tr>
+					<tr><td>
+						<input type="submit" name="submit" value="submit" text="Submit" />
+					</td></tr>
+				</table>
+			</form>
+		</fieldset>
+	</body>
+</html>
+
