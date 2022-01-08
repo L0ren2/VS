@@ -1,10 +1,9 @@
 package ourservlet;
 
+import java.io.FileReader;
 import java.io.IOException;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(urlPatterns = "/ServletPP", asyncSupported = true)
 public class ServletPP extends HttpServlet {
+	private Websocket websock;
 	private static final long serialVersionUID = 1L;
        
     /**
@@ -22,48 +22,58 @@ public class ServletPP extends HttpServlet {
      */
     public ServletPP() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append(
-				  "<form method=\"POST\" action=\"/OurServlet/ServletPP\" id=\"form\">"
-				+	 "<input type=\"submit\" value=\"submit\" text=\"submit\" />"
-				+ "</form>"
-		);
+		FileReader fr = new FileReader("./OurServlet/src/main/webapp/index.html");
+		char[] buffer = new char[2000];
+		fr.read(buffer);
+		fr.close();
+		String buffer_to_str = new String(buffer);
+		response.getWriter().append(buffer_to_str);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		final AsyncContext asyncContext = request.startAsync(request, response);
-		new Thread() {
+		//extract data from request
+		String topic = request.getParameter("topic");
+		String IP = request.getParameter("ip");
+		String PORT = request.getParameter("port");
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					ServletResponse response = asyncContext.getResponse();
-					response.getWriter().append("Using POST.").flush();
-					response.flushBuffer();
-					Thread.sleep(1000);
-					response.getWriter().append("\n1 Second passed.").flush();
-					response.flushBuffer();
-					Thread.sleep(1000);
-					response.getWriter().append("\n1 Second passed.").flush();;
-					asyncContext.complete();
-				} catch (IOException | InterruptedException e) {
-					// TODO Auto-generated catch block
+					// start websocket
+					websock = new Websocket(4242);
+					websock.connect();
+					
+					// start MqttReceiver
+					MqttReceiver rec = new MqttReceiver(topic, IP, PORT, websock);
+					rec.connect();
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}.start();
+        }).start();
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Reading html");
+		// return html doc (dynamic)
+		FileReader fr = new FileReader("./OurServlet/src/main/webapp/messenger.html");
+		char[] buffer = new char[2000];
+		fr.read(buffer);
+		fr.close();
+		String buffer_to_str = new String(buffer);
+		response.getWriter().append(buffer_to_str);
 	}
 }
-
 
 
