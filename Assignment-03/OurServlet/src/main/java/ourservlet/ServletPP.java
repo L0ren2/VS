@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(urlPatterns = "/ServletPP", asyncSupported = true)
 public class ServletPP extends HttpServlet {
-	private Websocket websock;
+	private Endpoint websock;
 	private static final long serialVersionUID = 1L;
        
     /**
@@ -28,7 +28,8 @@ public class ServletPP extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		FileReader fr = new FileReader("./OurServlet/src/main/webapp/index.html");
+		System.out.println(System.getProperty("user.dir"));
+		FileReader fr = new FileReader("./webapp/index.html");
 		char[] buffer = new char[2000];
 		fr.read(buffer);
 		fr.close();
@@ -44,22 +45,19 @@ public class ServletPP extends HttpServlet {
 		String topic = request.getParameter("topic");
 		String IP = request.getParameter("ip");
 		String PORT = request.getParameter("port");
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// start websocket
-					websock = new Websocket(4242);
-					websock.connect();
-					
-					// start MqttReceiver
-					MqttReceiver rec = new MqttReceiver(topic, IP, PORT, websock);
-					rec.connect();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-        }).start();
+		
+		try {
+			// start websocket
+			websock = new Endpoint();
+			websock.sendMessage("connected to server");
+			
+			// start MqttReceiver
+			MqttReceiver rec = new MqttReceiver(topic, IP, PORT, websock);
+			rec.connect();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// start websocket before sending back the html with js
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -67,7 +65,7 @@ public class ServletPP extends HttpServlet {
 		}
 		System.out.println("Reading html");
 		// return html doc (dynamic)
-		FileReader fr = new FileReader("./OurServlet/src/main/webapp/messenger.html");
+		FileReader fr = new FileReader("./webapp/messenger.html");
 		char[] buffer = new char[2000];
 		fr.read(buffer);
 		fr.close();

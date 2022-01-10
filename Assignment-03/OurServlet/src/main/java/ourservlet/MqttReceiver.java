@@ -13,8 +13,8 @@ public class MqttReceiver {
 	private MqttClient subscriber;
 	private String topic;
 	private String IP;
-	private volatile Websocket websock;
-	public MqttReceiver(String topic, String ipAddr, String Port, Websocket websock) throws IOException, MqttException {
+	private volatile Endpoint websock;
+	public MqttReceiver(String topic, String ipAddr, String Port, Endpoint websock) throws IOException, MqttException {
 		this.topic = topic;
 		this.IP = ipAddr + ":" + Port;
 		this.websock = websock;
@@ -40,7 +40,7 @@ public class MqttReceiver {
 			System.out.println("subscribed to topic");
 			String message = new String(msg.getPayload());
 			System.out.println(message);
-			websock.send(message);
+			websock.sendMessage(message);
 		});
 		while(true) { } // let thread run to automatically poll for new messages
 	}
