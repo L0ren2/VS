@@ -11,7 +11,7 @@ public class Endpoint {
 	@OnOpen
 	public void onOpen(Session session) throws IOException {
 		this.session = session;
-		session.getBasicRemote().sendText("<p>Connection established</p>");
+		session.getBasicRemote().sendText("{ 'text' : " + "'Connection established'" + "}");
 		System.out.print("Connected to Endpoint at /mqtt with ");
 		System.out.println("session: " + session);
 	}
@@ -21,7 +21,7 @@ public class Endpoint {
 	public void sendMessage(String message) throws IOException {
 		System.out.println("Session send: " + this.session);
 		System.out.printf("Sending: %s\n", message);
-		this.session.getBasicRemote().sendText(message);
+		this.session.getBasicRemote().sendText("{ 'text' : '" + message + "' }");
 	}
 	@OnError
 	public void onError(Throwable t) {
@@ -35,5 +35,4 @@ public class Endpoint {
 		session.close();
 	}
 }
-
 

@@ -11,7 +11,12 @@
 			socket.onmessage = function(e)
 			{
 				console.log(e.data);
-				//TODO more stuff
+				//Format:
+				//{
+				//  'text' : 'This is the Message'
+				//}
+				let msg = e.data.text;
+				document.getElementById("messages").innerHtml += "<li>" + msg + "</li>";
 			};
 			socket.onclose = function(e)
 			{
@@ -27,8 +32,8 @@
 		<h1>Welcome to MQTT Broker service</h1>
 		<fieldset>
 			<legend>This is the messenger.</legend>
-			<table id="messages">
-			</table>
+			<ul id="messages">
+			</ul>
 		</fieldset>
 	</body>
 </html>
