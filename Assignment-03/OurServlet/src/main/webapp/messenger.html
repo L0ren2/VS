@@ -15,8 +15,10 @@
 				//{
 				//  'text' : 'This is the Message'
 				//}
-				let msg = e.data.text;
-				document.getElementById("messages").innerHtml += "<li>" + msg + "</li>";
+				let json_obj = JSON.parse(e.data);
+				let msg = json_obj.text;
+				console.log("msg = " + msg);
+				document.getElementById("messages").innerHTML += "<li>" + msg + "</li>";
 			};
 			socket.onclose = function(e)
 			{
