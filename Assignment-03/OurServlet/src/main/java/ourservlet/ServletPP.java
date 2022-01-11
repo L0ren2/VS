@@ -29,7 +29,7 @@ public class ServletPP extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println(System.getProperty("user.dir"));
-		FileReader fr = new FileReader("./webapp/index.html");
+		FileReader fr = new FileReader("./OurServlet/src/main/webapp/index.html");
 		char[] buffer = new char[2000];
 		fr.read(buffer);
 		fr.close();
@@ -49,7 +49,7 @@ public class ServletPP extends HttpServlet {
 		try {
 			// start websocket
 			websock = new Endpoint();
-			websock.sendMessage("connected to server");
+			websock.sendMessage("connected to websocket");
 			
 			// start MqttReceiver
 			MqttReceiver rec = new MqttReceiver(topic, IP, PORT, websock);
@@ -58,14 +58,10 @@ public class ServletPP extends HttpServlet {
 			e.printStackTrace();
 		}
 		// start websocket before sending back the html with js
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		
 		System.out.println("Reading html");
 		// return html doc (dynamic)
-		FileReader fr = new FileReader("./webapp/messenger.html");
+		FileReader fr = new FileReader("./OurServlet/src/main/webapp/messenger.html");
 		char[] buffer = new char[2000];
 		fr.read(buffer);
 		fr.close();

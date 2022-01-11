@@ -13,20 +13,19 @@ public class MqttReceiver {
 	private MqttClient subscriber;
 	private String topic;
 	private String IP;
-	private volatile Endpoint websock;
-	public MqttReceiver(String topic, String ipAddr, String Port, Endpoint websock) throws IOException, MqttException {
+	private Endpoint endpoint;
+	public MqttReceiver(String topic, String ipAddr, String Port, Endpoint endpoint) throws IOException, MqttException {
 		this.topic = topic;
 		this.IP = ipAddr + ":" + Port;
-		this.websock = websock;
+		this.endpoint = endpoint;
 	}
 	public void connect() throws IOException, MqttException {
 		// connection for connecting with the topic
 		String subID = UUID.randomUUID().toString();
-		System.out.println("UUID: " + subID);
-		System.out.println("Connecting...");
+		System.out.println("Connecting to Mqtt Topic...");
 		subscriber = new MqttClient(IP, subID);
 		subscriber.connect();
-		System.out.println("Connected");
+		System.out.println("Connected to Topic");
 		subscriber.setCallback(new MqttCallback() {
 			@Override
 			public void connectionLost(Throwable arg0) {}
@@ -35,14 +34,12 @@ public class MqttReceiver {
 			@Override
 			public void messageArrived(String arg0, MqttMessage arg1) {}
 		});
-		System.out.println("Callback set");
 		subscriber.subscribe(topic, (topic, msg) -> {
-			System.out.println("subscribed to topic");
 			String message = new String(msg.getPayload());
 			System.out.println(message);
-			websock.sendMessage(message);
+			endpoint.sendMessage(message);
 		});
-		while(true) { } // let thread run to automatically poll for new messages
+		// let thread run to automatically poll for new messages
 	}
 	public void close() throws MqttException {
 		if(subscriber.isConnected())

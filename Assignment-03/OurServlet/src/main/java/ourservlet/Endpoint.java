@@ -1,28 +1,26 @@
 package ourservlet;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
 @ServerEndpoint("/mqtt")
 public class Endpoint {
 	private Session session;
-	public Endpoint() throws IOException {
-
-	}
+	
 	@OnOpen
-	public void onOpen(Session session) {
+	public void onOpen(Session session) throws IOException {
 		this.session = session;
+		session.getBasicRemote().sendText("<p>Connection established</p>");
+		System.out.print("Connected to Endpoint at /mqtt with ");
+		System.out.println("session: " + session);
 	}
 	@OnMessage
-	public void onMessage(String message, Session session) {
-		
-	}
+	public void onMessage(String message, Session session) {}
+	
 	public void sendMessage(String message) throws IOException {
-		System.out.printf("Sending: %s", message);
+		System.out.println("Session send: " + this.session);
+		System.out.printf("Sending: %s\n", message);
 		this.session.getBasicRemote().sendText(message);
 	}
 	@OnError
@@ -31,35 +29,11 @@ public class Endpoint {
 		t.printStackTrace();
 	}
 	@OnClose
-	public void onClose(Session session) {
+	public void onClose(Session session) throws IOException {
 		System.out.println("Closed session.");
+		this.session.close();
+		session.close();
 	}
-	/*public void connect() throws IOException {
-		// accept the socket connection asynchronously, so the main thread isnt blocked
-		System.out.println("Blocking at accept");
-		client = socket.accept();
-		output = client.getOutputStream();
-	
-	}
-	public void close() throws IOException {
-		if(output != null) {
-			output.flush();
-			output.close();
-		} else if(client != null) {
-			client.close();
-		}
-		if(socket != null) {
-			socket.close();
-		}
-	}
-
-	public void send(String message) throws IOException, InterruptedException {
-		while(output == null) {
-			Thread.sleep(20);
-		}
-		output.write(message.getBytes());
-		output.flush();
-	}*/
 }
 
 

@@ -4,9 +4,26 @@
 		<meta charset="utf-8" />
 		<title>MQTT Broker</title>
 		<!--<link href="styles.css" rel="stylesheet" />-->
-		<script type="text/javascript" src="script.js"></script>
+		<script>
+			let conn_str = "ws://localhost:8080/OurServlet/mqtt";
+			let	socket = new WebSocket(conn_str);
+	
+			socket.onmessage = function(e)
+			{
+				console.log(e.data);
+				//TODO more stuff
+			};
+			socket.onclose = function(e)
+			{
+				console.log("client has quit");
+			};
+			socket.onerror = function(e)
+			{
+				console.log("error: " + e);
+			};
+		</script>
 	</head>
-	<body onload="connect_to_servlet()">
+	<body>
 		<h1>Welcome to MQTT Broker service</h1>
 		<fieldset>
 			<legend>This is the messenger.</legend>
